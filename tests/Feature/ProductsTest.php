@@ -9,11 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ProductsTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
+    use RefreshDatabase;
     public function test_homepage_contains_empty_table()
     {
         $response = $this->get('/products');
@@ -23,7 +19,7 @@ class ProductsTest extends TestCase
     }
     public function test_homepage_contains_non_empty_table()
     {
-        Product::create([
+        $product = Product::create([
             'name' => 'product1',
             'price' => 123
         ]);
@@ -31,5 +27,9 @@ class ProductsTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertDontSee(__('No products found'));
+        $response->assertSee('product1');
+        $response->assertViewHas('products',function($collection) use ($product){
+            return $collection->contains($product); 
+        });
     }
 }
